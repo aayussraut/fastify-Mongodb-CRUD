@@ -1,0 +1,50 @@
+const getItems = async (collection, request, reply) => {
+  const result = await collection.find().toArray();
+  if (result.length === 0) throw new Error("No documents found");
+
+  return result;
+};
+
+const postItem = async (collection, request, reply) => {
+  try {
+    const result = await collection.insertOne(request.body);
+    reply.send({ success: true });
+  } catch (error) {
+    reply.send({ success: false });
+  }
+};
+
+const getItem = async (collection, request, reply) => {
+  try {
+    const result = await collection.findOne({ name: request.params.item });
+    console.log(result);
+    return result;
+  } catch (error) {
+    console.error("An error occurred while retrieving the item:", error);
+    throw new Error("Failed to retrieve the item.");
+  }
+};
+const updateItem = async (collection, request, reply) => {
+  const result = await collection.findOneAndUpdate(
+    { name: request.params.item },
+    { $set: { name: request.body.name } }
+  );
+  return result.value;
+};
+
+const deleteItem = async (collection, request, reply) => {
+  const result = await collection.deleteOne({ name: request.params.item });
+  if (result.deletedCount === 1) {
+    return { success: true };
+  } else {
+    return { success: false, message: "Item not found." };
+  }
+};
+
+module.exports = {
+  getItems,
+  postItem,
+  getItem,
+  updateItem,
+  deleteItem,
+};
